@@ -17,9 +17,10 @@ CREATE TABLE orders(
 	quantity INT
 );
 
-ALTER TABLE orders ALTER COLUMN id SET STATISTICS 10;
-ALTER TABLE orders ALTER COLUMN product_id SET STATISTICS 10;
-ALTER TABLE orders ALTER COLUMN quantity SET STATISTICS 10;
+-- utile si on veut forcer le trait, mais pas nécessaire
+--ALTER TABLE orders ALTER COLUMN id SET STATISTICS 10;
+--ALTER TABLE orders ALTER COLUMN product_id SET STATISTICS 10;
+--ALTER TABLE orders ALTER COLUMN quantity SET STATISTICS 10;
 
 INSERT INTO products (name, price) SELECT md5(i::TEXT), random() * 1000 FROM generate_series(1, :nbp) AS T(i);
 
