@@ -1,5 +1,6 @@
 \set ECHO queries
 CREATE EXTENSION IF NOT EXISTS pgstattuple;
+CREATE EXTENSION IF NOT EXISTS pg_buffercache;
 
 DROP TABLE IF EXISTS foo CASCADE;
 
@@ -20,8 +21,15 @@ CREATE INDEX foo_a_idx_ff ON foo(a) WITH (fillfactor = :density);
 
 SELECT * FROM pgstatindex('foo_a_idx_ff');
 
-\echo "Redémarrez postgres, videz le cache système, et jouez les autres commandes du script"
-\quit
+SELECT DISTINCT pg_buffercache_evict(bufferid)
+  FROM pg_buffercache
+ WHERE relfilenode = pg_relation_filenode('foo_a_idx');
+
+SELECT current_setting('data_directory') || '/' || pg_relation_filepath('foo_a_idx') AS foo_a_idx_path \gset
+
+\echo execute this and then type in Ctrl-D to resume: dd oflag=nocache conv=notrunc,fdatasync count=0 of=:foo_a_idx_path
+
+\i -
 
 UPDATE pg_index SET indisvalid = false WHERE indexrelid = 'foo_a_idx_ff'::regclass;
 
@@ -32,7 +40,16 @@ EXPLAIN (ANALYZE, BUFFERS, COSTS off) SELECT * FROM FOO ORDER BY a;
 UPDATE pg_index SET indisvalid = false WHERE indexrelid = 'foo_a_idx'::regclass;
 UPDATE pg_index SET indisvalid = true WHERE indexrelid = 'foo_a_idx_ff'::regclass;
 
--- Redémarrez postgres et videz le cache système
+SELECT DISTINCT pg_buffercache_evict(bufferid)
+  FROM pg_buffercache
+ WHERE relfilenode = pg_relation_filenode('foo_a_idx_ff');
+
+SELECT current_setting('data_directory') || '/' || pg_relation_filepath('foo_a_idx_ff') AS foo_a_idx_ff_path \gset
+
+\echo execute this and then type in Ctrl-D to resume: dd oflag=nocache conv=notrunc,fdatasync count=0 of=:foo_a_idx_ff_path
+
+\i -
+
 EXPLAIN (ANALYZE, BUFFERS, COSTS off) SELECT * FROM foo ORDER BY a;
 
 -- Execution Time ~= 140 ms chez moi
