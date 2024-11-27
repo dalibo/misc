@@ -1,4 +1,5 @@
 \set ECHO queries
+\set ON_ERROR_STOP on
 CREATE EXTENSION IF NOT EXISTS pgstattuple;
 CREATE EXTENSION IF NOT EXISTS pg_buffercache;
 
@@ -21,15 +22,9 @@ CREATE INDEX foo_a_idx_ff ON foo(a) WITH (fillfactor = :density);
 
 SELECT * FROM pgstatindex('foo_a_idx_ff');
 
-SELECT DISTINCT pg_buffercache_evict(bufferid)
-  FROM pg_buffercache
- WHERE relfilenode = pg_relation_filenode('foo_a_idx');
+SELECT 'foo_a_idx' AS relname \gset
 
-SELECT current_setting('data_directory') || '/' || pg_relation_filepath('foo_a_idx') AS foo_a_idx_path \gset
-
-\echo execute this and then type in Ctrl-D to resume: dd oflag=nocache conv=notrunc,fdatasync count=0 of=:foo_a_idx_path
-
-\i -
+\ir evict_from_both_caches.sql
 
 UPDATE pg_index SET indisvalid = false WHERE indexrelid = 'foo_a_idx_ff'::regclass;
 
@@ -40,15 +35,9 @@ EXPLAIN (ANALYZE, BUFFERS, COSTS off) SELECT * FROM FOO ORDER BY a;
 UPDATE pg_index SET indisvalid = false WHERE indexrelid = 'foo_a_idx'::regclass;
 UPDATE pg_index SET indisvalid = true WHERE indexrelid = 'foo_a_idx_ff'::regclass;
 
-SELECT DISTINCT pg_buffercache_evict(bufferid)
-  FROM pg_buffercache
- WHERE relfilenode = pg_relation_filenode('foo_a_idx_ff');
+SELECT 'foo_a_idx_ff' AS relname \gset
 
-SELECT current_setting('data_directory') || '/' || pg_relation_filepath('foo_a_idx_ff') AS foo_a_idx_ff_path \gset
-
-\echo execute this and then type in Ctrl-D to resume: dd oflag=nocache conv=notrunc,fdatasync count=0 of=:foo_a_idx_ff_path
-
-\i -
+\ir evict_from_both_caches.sql
 
 EXPLAIN (ANALYZE, BUFFERS, COSTS off) SELECT * FROM foo ORDER BY a;
 
