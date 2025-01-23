@@ -1,3 +1,5 @@
+-- dd hack from https://pganalyze.com/blog/5mins-postgres-17-pg-buffercache-evict
+
 SELECT DISTINCT pg_buffercache_evict(bufferid)
   FROM pg_buffercache
  WHERE relfilenode = pg_relation_filenode(:'relname');
