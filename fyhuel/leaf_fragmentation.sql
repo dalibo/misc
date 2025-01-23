@@ -17,7 +17,7 @@ SELECT * FROM pgstatindex('foo_a_idx');
 
 SELECT avg_leaf_density::int AS density FROM pgstatindex('foo_a_idx') \gset
 
--- Cet index aura une fragmentation nulle et la même densité que l'autre
+-- This index will have zero leaf_fragmentation and same density as the previous one
 CREATE INDEX foo_a_idx_ff ON foo(a) WITH (fillfactor = :density);
 
 SELECT * FROM pgstatindex('foo_a_idx_ff');
@@ -30,7 +30,7 @@ UPDATE pg_index SET indisvalid = false WHERE indexrelid = 'foo_a_idx_ff'::regcla
 
 EXPLAIN (ANALYZE, BUFFERS, COSTS off) SELECT * FROM FOO ORDER BY a;
 
--- Execution Time ~= 400 ms chez moi
+-- Execution Time ~= 340 ms on my laptop
 
 UPDATE pg_index SET indisvalid = false WHERE indexrelid = 'foo_a_idx'::regclass;
 UPDATE pg_index SET indisvalid = true WHERE indexrelid = 'foo_a_idx_ff'::regclass;
@@ -41,4 +41,4 @@ SELECT 'foo_a_idx_ff' AS relname \gset
 
 EXPLAIN (ANALYZE, BUFFERS, COSTS off) SELECT * FROM foo ORDER BY a;
 
--- Execution Time ~= 140 ms chez moi
+-- Execution Time ~= 90 ms
