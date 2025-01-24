@@ -1,0 +1,9 @@
+CREATE EXTENSION IF NOT EXISTS pg_buffercache ;
+
+CREATE UNLOGGED TABLE foo(a INT, filler TEXT);
+
+INSERT INTO foo SELECT i%2000, md5(i::text) FROM generate_series(1,20000000) AS T(i);
+
+VACUUM ANALYZE foo;
+
+CREATE INDEX ON foo(a);
