@@ -12,5 +12,5 @@ COPY (SELECT format ('dd oflag=nocache conv=notrunc,fdatasync count=0 of=%s',
 
 \! chmod +x /tmp/evict_index_from_page_cache.sh
 
-\! /tmp/evict_index_from_page_cache.sh
+\! /tmp/evict_index_from_page_cache.sh 2> /dev/null
 
