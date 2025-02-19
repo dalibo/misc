@@ -1,3 +1,4 @@
+SELECT version();
 CREATE EXTENSION IF NOT EXISTS pg_buffercache ;
 
 CREATE UNLOGGED TABLE eic_cyclic(a INT, filler TEXT) WITH (fillfactor = 100);

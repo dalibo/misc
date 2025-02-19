@@ -18,7 +18,7 @@ function check_node_type()
 	fi
 }
 
-dropdb --if-exists bench_eic; createdb bench_eic; psql -f init.sql bench_eic
+dropdb --if-exists bench_eic; createdb bench_eic; psql -Aqt -f init.sql bench_eic
 
 json="/tmp/eic_explain"
 subjson="/tmp/eic_explain_sub"
