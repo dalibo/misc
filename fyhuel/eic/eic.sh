@@ -28,7 +28,7 @@ for dataset in "cyclic" "uniform"; do
 		for eic in 1 2 4 8 16 32 64; do
 
 			rm -f $json
-			psql -f eic.sql -v nbw=$nbw -v eic=$eic -v tname="eic_$dataset" -Aqt bench_eic
+			psql -f eic.sql -v output=$json -v nbw=$nbw -v eic=$eic -v tname="eic_$dataset" -Aqt bench_eic
 
 			total_exec_time=`jq '.[0]."Execution Time"' $json`
 
