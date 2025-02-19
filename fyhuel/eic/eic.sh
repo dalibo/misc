@@ -26,6 +26,13 @@ subjson="/tmp/eic_explain_sub"
 echo "dataset, nbw, eic, bhs_excl_time, total_exec_time, bhs_io_time"
 
 for dataset in "cyclic" "uniform"; do
+
+	if [[ "$dataset" == "uniform" ]]; then
+		a_max=140
+	else
+		a_max=100
+	fi
+
 	for nbw in 0 2; do
 		for eic in 1 2 4 8 16 32 64; do
 
@@ -34,6 +41,7 @@ for dataset in "cyclic" "uniform"; do
 				-v output=$json \
 				-v nbw=$nbw \
 				-v eic=$eic \
+				-v a_max=$a_max \
 				-v tname="eic_$dataset" \
 				-v path_to_evict_script="$PATH_TO_EVICT_SCRIPT" \
 				-Aqt bench_eic
