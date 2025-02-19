@@ -1,3 +1,4 @@
+\set ON_ERROR_STOP
 SELECT version();
 CREATE EXTENSION IF NOT EXISTS pg_buffercache ;
 

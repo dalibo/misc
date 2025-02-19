@@ -1,3 +1,4 @@
+\set ON_ERROR_STOP
 \o /dev/null
 SET track_io_timing = ON;
 SET max_parallel_workers_per_gather = :nbw ;
