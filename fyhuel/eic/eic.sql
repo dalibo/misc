@@ -5,7 +5,7 @@ SET parallel_setup_cost = 10;
 SET work_mem = '16MB';
 SELECT :'tname' AS relname \gset
 SET effective_io_concurrency = :eic ;
-\i ~/git/public/misc/fyhuel/evict_from_both_caches.sql
+\i :path_to_evict_script
 \o :output
 EXPLAIN (ANALYZE, SETTINGS, BUFFERS, COSTS OFF, FORMAT JSON)
   SELECT * FROM :tname WHERE a < 120 AND filler > 'fffffff';
