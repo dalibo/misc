@@ -4,7 +4,9 @@ set -e
 
 debug="$1"
 
-source ./eic_config
+dname=`dirname "${BASH_SOURCE[0]}"`
+
+source "$dname/eic_config"
 
 function check_node_type()
 {
@@ -18,7 +20,7 @@ function check_node_type()
 	fi
 }
 
-dropdb --if-exists bench_eic; createdb bench_eic; psql -Aqt -f init.sql bench_eic
+dropdb --if-exists bench_eic; createdb bench_eic; psql -Aqt -f "$dname/init.sql" bench_eic
 
 json="/tmp/eic_explain"
 subjson="/tmp/eic_explain_sub"
@@ -37,7 +39,7 @@ for dataset in "cyclic" "uniform"; do
 		for eic in 1 2 4 8 16 32 64; do
 
 			rm -f $json
-			psql -f eic.sql \
+			psql -f "$dname/eic.sql" \
 				-v output=$json \
 				-v nbw=$nbw \
 				-v eic=$eic \
