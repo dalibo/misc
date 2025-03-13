@@ -25,7 +25,7 @@ dropdb --if-exists bench_eic; createdb bench_eic; psql -Aqt -f "$dname/init.sql"
 json="/tmp/eic_explain_${BASHPID}"
 subjson="/tmp/eic_explain_sub_${BASHPID}"
 
-echo "dataset, nbw, eic, bhs_excl_time, total_exec_time, bhs_io_time, bhs_io_wait_time"
+echo "dataset, nbw, eic, bhs excl time, blocks read, io read time, io wait time"
 
 for dataset in "cyclic" "uniform"; do
 
@@ -35,8 +35,8 @@ for dataset in "cyclic" "uniform"; do
 		a_max=100
 	fi
 
-	for nbw in 0 2; do
-		for eic in 0 1 2 4 8 16 32 64; do
+	for nbw in 0 4; do
+		for eic in 0 1 2 4 8 16 32 64 128; do
 
 			rm -f $json
 			psql -f "$dname/eic.sql" \
@@ -48,11 +48,10 @@ for dataset in "cyclic" "uniform"; do
 				-v path_to_evict_script="$PATH_TO_EVICT_SCRIPT" \
 				-Aqt bench_eic
 
-			total_exec_time=`jq '.[0]."Execution Time"' $json`
-
 			if [ $nbw -gt 0 ]; then
 				root_node_type=`jq -r '.[0].Plan."Node Type"' $json`
 				check_node_type "$root_node_type" 'Gather'
+				launched=`jq -r '.[0].Plan."Workers Launched"' $json`
 				topm1_node_type=`jq -r '.[0].Plan.Plans[0]."Node Type"' $json`
 				check_node_type "$topm1_node_type" 'Bitmap Heap Scan'
 				jq -r '.[0].Plan.Plans[0]' $json > $subjson
@@ -65,6 +64,7 @@ for dataset in "cyclic" "uniform"; do
 			bhs_end_time=`jq '."Actual Total Time"' $subjson`
 			bis_end_time=`jq '.Plans[0]."Actual Total Time"' $subjson`
 			bhs_io_time=`jq '."Shared I/O Read Time"' $subjson`
+			bhs_io_blk=`jq '."Shared Read Blocks"' $subjson`
 			bhs_io_wait_time=`jq '."Shared I/O Wait Time"' $subjson`
 
 			if [[ $debug == "true" ]]; then
@@ -76,7 +76,12 @@ for dataset in "cyclic" "uniform"; do
 
 			bhs_excl_time=`bc -l <<< "$bhs_end_time - $bis_end_time"`
 
-			echo "$dataset, $nbw, $eic, $bhs_excl_time, $total_exec_time,"\
+			workers_launched=$launched
+			if [ $nbw -eq 0 ]; then
+				workers_launched=0;
+			fi
+
+			echo "$dataset, $workers_launched, $eic, $bhs_excl_time, $bhs_io_blk,"\
 				"$bhs_io_time, $bhs_io_wait_time"
 		done
 	done

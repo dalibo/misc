@@ -5,6 +5,7 @@ SET track_io_timing = ON;
 SET max_parallel_workers_per_gather = :nbw ;
 SET parallel_setup_cost = 10;
 SET work_mem = '16MB';
+SET parallel_leader_participation = off;
 SET effective_io_concurrency = :eic ;
 
 \set relname :tname

@@ -14,3 +14,5 @@ VACUUM ANALYZE eic_uniform;
 
 CREATE INDEX ON eic_cyclic(a);
 CREATE INDEX ON eic_uniform(a);
+
+ALTER TABLE eic_uniform SET (parallel_workers = 4);
