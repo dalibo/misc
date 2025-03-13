@@ -25,7 +25,7 @@ dropdb --if-exists bench_eic; createdb bench_eic; psql -Aqt -f "$dname/init.sql"
 json="/tmp/eic_explain"
 subjson="/tmp/eic_explain_sub"
 
-echo "dataset, nbw, eic, bhs_excl_time, total_exec_time, bhs_io_time"
+echo "dataset, nbw, eic, bhs_excl_time, total_exec_time, bhs_io_time, bhs_io_wait_time"
 
 for dataset in "cyclic" "uniform"; do
 
@@ -36,7 +36,7 @@ for dataset in "cyclic" "uniform"; do
 	fi
 
 	for nbw in 0 2; do
-		for eic in 1 2 4 8 16 32 64; do
+		for eic in 0 1 2 4 8 16 32 64; do
 
 			rm -f $json
 			psql -f "$dname/eic.sql" \
@@ -65,16 +65,19 @@ for dataset in "cyclic" "uniform"; do
 			bhs_end_time=`jq '."Actual Total Time"' $subjson`
 			bis_end_time=`jq '.Plans[0]."Actual Total Time"' $subjson`
 			bhs_io_time=`jq '."Shared I/O Read Time"' $subjson`
+			bhs_io_wait_time=`jq '."Shared I/O Wait Time"' $subjson`
 
 			if [[ $debug == "true" ]]; then
 				echo "bhs_end_time: $bhs_end_time"
 				echo "bis_end_time: $bis_end_time"
 				echo "bhs_io_time: $bhs_io_time"
+				echo "bhs_io_wait_time: $bhs_io_wait_time"
 			fi
 
 			bhs_excl_time=`bc -l <<< "$bhs_end_time - $bis_end_time"`
 
-			echo "$dataset, $nbw, $eic, $bhs_excl_time, $total_exec_time, $bhs_io_time"
+			echo "$dataset, $nbw, $eic, $bhs_excl_time, $total_exec_time,"\
+				"$bhs_io_time, $bhs_io_wait_time"
 		done
 	done
 done
