@@ -22,8 +22,8 @@ function check_node_type()
 
 dropdb --if-exists bench_eic; createdb bench_eic; psql -Aqt -f "$dname/init.sql" bench_eic
 
-json="/tmp/eic_explain"
-subjson="/tmp/eic_explain_sub"
+json="/tmp/eic_explain_${BASHPID}"
+subjson="/tmp/eic_explain_sub_${BASHPID}"
 
 echo "dataset, nbw, eic, bhs_excl_time, total_exec_time, bhs_io_time, bhs_io_wait_time"
 

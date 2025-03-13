@@ -1,6 +1,7 @@
 \set ON_ERROR_STOP
 SELECT version();
 CREATE EXTENSION IF NOT EXISTS pg_buffercache ;
+CREATE EXTENSION IF NOT EXISTS pgfincore ;
 
 CREATE UNLOGGED TABLE eic_cyclic(a INT, filler TEXT) WITH (fillfactor = 100);
 CREATE UNLOGGED TABLE eic_uniform(a INT, filler TEXT) WITH (fillfactor = 100);
