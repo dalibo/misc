@@ -2,6 +2,7 @@
 
 SET max_parallel_workers_per_gather = 0;
 SET JIT = off;
+SET enable_indexscan = off;
 
 DROP TABLE IF EXISTS tbt ;
 CREATE UNLOGGED TABLE tbt
