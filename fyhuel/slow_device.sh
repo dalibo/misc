@@ -1,13 +1,21 @@
 #!/bin/bash
 
+## This example creates a slow device of 200 MB with 10ms latency,
+## then decreases latency to 5ms, and finally umount the device.
+##
+## create_slow_device 200
+## mount_slow_device
+## reload_slow_device 5
+## umount_slow_device
+
 export SLOW_DIR="${HOME}/slow"
 export SLOW_MP="${SLOW_DIR}/mp"
 export SLOW_FS="${SLOW_DIR}/fs"
 export SLOW_SZ="${SLOW_DIR}/size"
 export SLOW_CONF="${SLOW_DIR}/dmsetup_conf"
 
-# latence de 100ms par défaut
-export SLOW_LT=100
+# latence de 10ms par défaut
+export SLOW_LT=10
 
 function create_slow_device()
 {
@@ -16,10 +24,10 @@ function create_slow_device()
 	echo $size_mb > $SLOW_SZ
 	dd if=/dev/zero of=${SLOW_FS} bs=1M count=${size_mb}
 	/sbin/mkfs.ext4 $SLOW_FS
-	create_dmsetup_conf $size_mb $SLOW_LT
+	__create_dmsetup_conf $size_mb $SLOW_LT
 }
 
-function create_dmsetup_conf()
+function __create_dmsetup_conf()
 {
 	blocs=$(( $1 * 1024 * 1024 / 512 ))
 	delay_ms=$2
@@ -34,7 +42,7 @@ function reload_slow_device()
 	lat=$1
 	size_mb=`cat $SLOW_SZ`
 	umount_slow_device
-	create_dmsetup_conf $size_mb $lat
+	__create_dmsetup_conf $size_mb $lat
 	mount_slow_device
 }
 
@@ -50,5 +58,5 @@ function mount_slow_device()
 	sudo /sbin/losetup --find --show $SLOW_FS
 	sudo /usr/sbin/dmsetup create delayed-device $SLOW_CONF
 	sudo mount -o sync /dev/mapper/delayed-device $SLOW_MP
-	sudo chown -R postgres: $SLOW_MP
+	sudo chown -R ${USER}: $SLOW_MP
 }
